@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+target
+*.egg-info/
+*.cache
+.eggs
+*/.eggs/*
+.hypothesis
+dist
+build
