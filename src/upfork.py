@@ -117,17 +117,6 @@ def scan_repository_root(repository_root):
     return RepositorySet(repository_root, repositories)
 
 
-def parse_args(args):
-    if args[1] == 'list':
-        return Command(args[1], args[2])
-    elif args[1] == 'update-local':
-        return Command(args[1], args[2])
-    elif args[1] == 'update-remote':
-        return Command(args[1], args[2])
-    else:
-        raise ValueError(f'The argument `{args[1]}` is not a valid command name.')
-
-
 def run_list(repository_set):
     print(f'Found {len(repository_set.repositories)} Git repositories in `{repository_set.repository_root}`\n')
     for repo in repository_set.repositories.values():
@@ -135,7 +124,6 @@ def run_list(repository_set):
         print(f'Repository: {repo_path}')
         print(f'Origin: {repo.origin_url}')
         print(f'Remote URLs: {repo.remote_urls}\n')
-
 
 
 def run_update_local(repository_set):
@@ -208,6 +196,17 @@ def run_command(command, repository_set):
         run_update_remote(repository_set)
     else:
         raise ValueError(f'The command name `{command.name}` is not a valid command.')
+
+
+def parse_args(args):
+    if args[1] == 'list':
+        return Command(args[1], args[2])
+    elif args[1] == 'update-local':
+        return Command(args[1], args[2])
+    elif args[1] == 'update-remote':
+        return Command(args[1], args[2])
+    else:
+        raise ValueError(f'The argument `{args[1]}` is not a valid command name.')
 
 
 def usage():
