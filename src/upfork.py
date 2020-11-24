@@ -123,7 +123,7 @@ def parse_args(args):
     elif args[1] == 'update-local':
         return Command(args[1], args[2])
     elif args[1] == 'update-remote':
-        raise NotImplementedError
+        return Command(args[1], args[2])
     else:
         raise ValueError(f'The argument `{args[1]}` is not a valid command name.')
 
@@ -163,8 +163,40 @@ def run_update_local(repository_set):
     os.chdir(old_working_dir)
 
 
-def run_update_remote(repository_set, credentials):
-    raise NotImplementedError
+def run_update_remote(repository_set):
+    def git_push(label):
+        """
+        return subprocess.run(
+            ['git', 'push', '--all', label], 
+            capture_output=True, 
+            text=True
+        )
+        """
+        return subprocess.run(['echo'], capture_output=True, text=True)
+        
+    old_working_dir = os.getcwd()
+    os.chdir(repository_set.repository_root)
+    for repository in repository_set.repositories.values():
+        os.chdir(repository.name)
+        for label, remote_url in repository.remote_urls.items():
+            result = git_push(label)
+            if result.returncode == 0:
+                print(
+                    f'The remote copy of repository of `{repository.name}` with ' 
+                    f'the name `{label}` and the URL `{remote_url}` has been '
+                    f'updated successfully.'
+                )
+            else:
+                print(
+                    f'An error occurred in updating the remote copy of the '
+                    f'repository `{repository.name}` to the URL named `{label}` at URL `{remote_url}`.'
+                )
+                print(f'{result.stderr}')
+                print(f'{result.stdout}')
+
+        os.chdir(os.path.pardir)
+
+    os.chdir(old_working_dir)
 
 
 def run_command(command, repository_set):
@@ -173,14 +205,9 @@ def run_command(command, repository_set):
     elif command.is_update_local():
         run_update_local(repository_set)
     elif command.is_update_remote():
-        run_update_remote(
-            repository_set, dict(
-                username=command.username, 
-                password=command.password
-            )
-        )
+        run_update_remote(repository_set)
     else:
-        raise ValueError(f'The command name `{command.command}` is not a valid command name.')
+        raise ValueError(f'The command name `{command.name}` is not a valid command.')
 
 
 def usage():
@@ -191,7 +218,7 @@ def usage():
         'Update the local copies of the git repositories in a directory\n',
         '`upfork update-local /path/to/git/repository/forks/`\n',
         'Update the remote copies of the git repositories in a directory\n',
-        '`upfork update-remote --username=USERANME --password=PASSWORD /path/to/git/repository/forks/`\n'
+        '`upfork update-remote /path/to/git/repository/forks/`\n'
     ))
 
 
