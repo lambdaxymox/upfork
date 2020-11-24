@@ -70,7 +70,7 @@ def remote_urls(labels, exclude=['origin']):
     return urls
  
 
-def scan_repo_root(repository_root):
+def scan_repository_root(repository_root):
     owd = os.getcwd()
     os.chdir(repository_root)
     repositories = dict(
@@ -110,7 +110,7 @@ def main():
     if not os.path.exists(repo_root):
         sys.exit(f'Path does not exist: {repo_root}')
                          
-    repos = scan_repo_root(repo_root)
+    repos = scan_repository_root(repo_root)
     for repo in repos['repositories'].values():
         repo_path = os.path.join(repo_root, repo.name)
         print(f'REPO: {repo_path}')
