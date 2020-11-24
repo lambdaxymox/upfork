@@ -4,6 +4,12 @@ import subprocess
 import sys
 
 
+class RepositorySet:
+    def __init__(self, repository_root, repositories):
+        self.repository_root = repository_root
+        self.repositories = repositories
+
+
 class Repository:
     def __init__(self, name, origin_url, remote_urls):
         self.name = name
@@ -71,13 +77,10 @@ def remote_urls(labels, exclude=['origin']):
  
 
 def scan_repository_root(repository_root):
+    repositories = {}
     owd = os.getcwd()
     os.chdir(repository_root)
-    repositories = dict(
-        repository_root = repository_root,
-        repositories = {}
-    )
-    for name in (name for name in os.listdir('.') if is_git_repo(name)):
+    for name in (name for name in os.listdir(repository_root) if is_git_repo(name)):
         os.chdir(name)
         try:
             origin_url = get_url_by_label('origin')
@@ -87,37 +90,52 @@ def scan_repository_root(repository_root):
         labels = remote_url_labels()
         urls = remote_urls(labels)
 
-        repo = Repository(name, origin_url, urls)
-        repositories['repositories'][name] = repo
+        repository = Repository(name, origin_url, urls)
+        repositories[name] = repository
         
         os.chdir('..')
 
     os.chdir(owd)
+    repository_set = RepositorySet(repository_root, repositories)
 
-    return repositories
+    return repository_set
 
 
 def usage():
-    return 'USAGE: upfork [list | update-local | update-remote] /path/to/git/repository/forks/'
+    return 'USAGE: upfork list /path/to/git/repository/forks/'
+
+
+class Command:
+    def __init__(self, command, repository_root):
+        self.command = command
+        self.repository_root = repository_root
+
+
+def parse_args(args):
+    if args[1] == 'list':
+        return Command(args[1], args[2])
+    else:
+        raise ValueError()
 
 
 def main():
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         sys.exit(usage())
 
-    repo_root = sys.argv[1]
-    
+    command = parse_args(sys.argv)
+    repo_root = command.repository_root
+
     if not os.path.exists(repo_root):
         sys.exit(f'Path does not exist: {repo_root}')
                          
     repos = scan_repository_root(repo_root)
-    for repo in repos['repositories'].values():
+    for repo in repos.repositories.values():
         repo_path = os.path.join(repo_root, repo.name)
         print(f'REPO: {repo_path}')
         print(f'ORIGIN: {repo.origin_url}')
         print(f'MYORIGIN: {repo.remote_urls}')
 
-    print(len(repos['repositories']))
+    print(len(repos.repositories))
 
 
 if __name__ == 'main':
