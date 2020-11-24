@@ -18,24 +18,24 @@ class Repository:
 
 
 class Command:
-    def __init__(self, command, repository_root, username='', password=''):
-        self.command = command
+    def __init__(self, name, repository_root, username='', password=''):
+        self.name = name
         self.repository_root = repository_root
         self.useranme = username
         self.password = password
 
     def is_list(self):
-        return self.command == 'list'
+        return self.name == 'list'
 
     def is_update_local(self):
-        return self.command == 'update-local'
+        return self.name == 'update-local'
 
     def is_update_remote(self):
-        return self.command == 'update-remote'
+        return self.name == 'update-remote'
 
 
 def is_git_repo(name):
-    owd = os.getcwd()
+    old_working_dir = os.getcwd()
     ret = None
     if os.path.isdir(name):
         os.chdir(name)
@@ -51,7 +51,7 @@ def is_git_repo(name):
     else:
         ret = False
 
-    os.chdir(owd)
+    os.chdir(old_working_dir)
 
     assert ret is not None
     return ret
@@ -95,7 +95,7 @@ def remote_urls(labels, exclude=['origin']):
 
 def scan_repository_root(repository_root):
     repositories = {}
-    owd = os.getcwd()
+    old_working_dir = os.getcwd()
     os.chdir(repository_root)
     for name in (name for name in os.listdir(repository_root) if is_git_repo(name)):
         os.chdir(name)
@@ -112,7 +112,7 @@ def scan_repository_root(repository_root):
         
         os.chdir(os.path.pardir)
 
-    os.chdir(owd)
+    os.chdir(old_working_dir)
 
     return RepositorySet(repository_root, repositories)
 
@@ -146,19 +146,21 @@ def run_update_local(repository_set):
             text=True
         )
         
-    owd = os.getcwd()
+    old_working_dir = os.getcwd()
     os.chdir(repository_set.repository_root)
-    for repository in repository_set.repositories:
+    for repository in repository_set.repositories.values():
         os.chdir(repository.name)
         result = git_pull()
-        if result.returncode != 0:
-            print(f'An error occurred in updating {repository.name}')
+        if result.returncode == 0:
+            print(f'The repository `{repository.name}` has been updated successfully.')
+        else:
+            print(f'An error occurred in updating the repository `{repository.name}`')
             print(f'{result.stderr}')
             print(f'{result.stdout}')
 
         os.chdir(os.path.pardir)
 
-    os.chdir(owd)
+    os.chdir(old_working_dir)
 
 
 def run_update_remote(repository_set, credentials):
