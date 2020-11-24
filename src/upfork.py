@@ -116,6 +116,9 @@ class Command:
     def is_update_local(self):
         return self.command == 'update-local'
 
+    def is_update_remote(self):
+        return self.command == 'update-remote'
+
 
 def parse_args(args):
     if args[1] == 'list':
@@ -136,8 +139,27 @@ def run_list(repository_set):
 
 
 
-def run_update_local(resposity_set):
-    raise NotImplementedError
+def run_update_local(repository_set):
+    def git_pull():
+        return subprocess.run(
+            ['git', 'pull', 'origin'], 
+            capture_output=True, 
+            text=True
+        )
+        
+    owd = os.getcwd()
+    os.chdir(repository_set.repository_root)
+    for repository in repository_set.repositories:
+        os.chdir(repository.name)
+        result = git_pull()
+        if result.returncode != 0:
+            print(f'An error occurred in updating {repository.name}')
+            print(f'{result.stderr}')
+            print(f'{result.stdout}')
+
+        os.chdir(os.path.pardir)
+
+    os.chdir(owd)
 
 
 def run_command(command, repository_set):
