@@ -20,7 +20,7 @@ class Repository:
 
 def is_git_repo(name):
     owd = os.getcwd()
-    ret = False
+    ret = None
     if os.path.isdir(name):
         os.chdir(name)
         result = subprocess.run(
@@ -37,6 +37,7 @@ def is_git_repo(name):
 
     os.chdir(owd)
 
+    assert ret is not None
     return ret
 
 
