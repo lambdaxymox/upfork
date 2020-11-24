@@ -192,6 +192,7 @@ def usage():
         '`upfork update-remote --username=USERANME --password=PASSWORD /path/to/git/repository/forks/`\n'
     ))
 
+
 def main():
     if len(sys.argv) < 3:
         sys.exit(usage())
