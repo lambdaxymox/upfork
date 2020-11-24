@@ -110,6 +110,12 @@ class Command:
         self.command = command
         self.repository_root = repository_root
 
+    def is_list(self):
+        return self.command == 'list'
+
+    def is_update_local(self):
+        return self.command == 'update-local'
+
 
 def parse_args(args):
     if args[1] == 'list':
@@ -135,9 +141,9 @@ def run_update_local(resposity_set):
 
 
 def run_command(command, repository_set):
-    if command.command == 'list':
+    if command.is_list():
         run_list(repository_set)
-    elif command.command == 'update-local':
+    elif command.is_update_local():
         run_update_local(repository_set)
     else:
         raise ValueError(f'The command name `{command.command}` is not a valid command name.')
