@@ -101,7 +101,7 @@ def scan_repository_root(repository_root):
 
 
 def usage():
-    return 'USAGE: upfork list /path/to/git/repository/forks/'
+    return 'USAGE: upfork [list | update-local | update-remote] /path/to/git/repository/forks/'
 
 
 class Command:
@@ -113,6 +113,31 @@ class Command:
 def parse_args(args):
     if args[1] == 'list':
         return Command(args[1], args[2])
+    elif args[1] == 'update-local':
+        return Command(args[1], args[2])
+    else:
+        raise ValueError()
+
+
+def run_list(repository_set):
+    print(f'Found {len(repository_set.repositories)} Git repositories in `{repository_set.repository_root}`\n')
+    for repo in repository_set.repositories.values():
+        repo_path = os.path.join(repository_set.repository_root, repo.name)
+        print(f'Repository: {repo_path}')
+        print(f'Origin: {repo.origin_url}')
+        print(f'Remote URLs: {repo.remote_urls}\n')
+
+
+
+def run_update_local(resposity_set):
+    raise NotImplementedError
+
+
+def run_command(command, repository_set):
+    if command.command == 'list':
+        run_list(repository_set)
+    elif command.command == 'update-local':
+        run_update_local(repository_set)
     else:
         raise ValueError()
 
@@ -122,19 +147,12 @@ def main():
         sys.exit(usage())
 
     command = parse_args(sys.argv)
-    repository_root = command.repository_root
 
-    if not os.path.exists(repository_root):
-        sys.exit(f'Path does not exist: {repository_root}')
+    if not os.path.exists(command.repository_root):
+        sys.exit(f'Path does not exist: {command.repository_root}')
                          
-    repos = scan_repository_root(repository_root)
-    for repo in repos.repositories.values():
-        repo_path = os.path.join(repository_root, repo.name)
-        print(f'REPO: {repo_path}')
-        print(f'ORIGIN: {repo.origin_url}')
-        print(f'MYORIGIN: {repo.remote_urls}')
-
-    print(len(repos.repositories))
+    repos = scan_repository_root(command.repository_root)
+    run_command(command, repos)
 
 
 if __name__ == 'main':
