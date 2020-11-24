@@ -8,3 +8,4 @@ target
 .hypothesis
 dist
 build
+.vscode
