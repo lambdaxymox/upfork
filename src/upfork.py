@@ -117,7 +117,7 @@ def parse_args(args):
     elif args[1] == 'update-local':
         return Command(args[1], args[2])
     else:
-        raise ValueError()
+        raise ValueError(f'The argument `{args[1]}` is not a valid command name.')
 
 
 def run_list(repository_set):
@@ -140,7 +140,7 @@ def run_command(command, repository_set):
     elif command.command == 'update-local':
         run_update_local(repository_set)
     else:
-        raise ValueError()
+        raise ValueError(f'The command name `{command.command}` is not a valid command name.')
 
 
 def main():
