@@ -117,18 +117,6 @@ def scan_repository_root(repository_root):
     return RepositorySet(repository_root, repositories)
 
 
-def usage():
-    return ''.join((
-        'USAGE:\n',
-        'List the git repositories in a directory\n',
-        '`upfork list /path/to/git/repository/forks/`\n',
-        'Update the local copies of the git repositories in a directory\n',
-        '`upfork update-local /path/to/git/repository/forks/`\n',
-        'Update the remote copies of the git repositories in a directory\n',
-        '`upfork update-remote --username=USERANME --password=PASSWORD /path/to/git/repository/forks/`\n'
-    ))
-
-
 def parse_args(args):
     if args[1] == 'list':
         return Command(args[1], args[2])
@@ -192,6 +180,17 @@ def run_command(command, repository_set):
     else:
         raise ValueError(f'The command name `{command.command}` is not a valid command name.')
 
+
+def usage():
+    return ''.join((
+        'USAGE:\n',
+        'List the git repositories in a directory\n',
+        '`upfork list /path/to/git/repository/forks/`\n',
+        'Update the local copies of the git repositories in a directory\n',
+        '`upfork update-local /path/to/git/repository/forks/`\n',
+        'Update the remote copies of the git repositories in a directory\n',
+        '`upfork update-remote --username=USERANME --password=PASSWORD /path/to/git/repository/forks/`\n'
+    ))
 
 def main():
     if len(sys.argv) < 3:
