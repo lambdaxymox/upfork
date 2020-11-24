@@ -17,6 +17,22 @@ class Repository:
         self.remote_urls = remote_urls
 
 
+class Command:
+    def __init__(self, command, repository_root, username='', password=''):
+        self.command = command
+        self.repository_root = repository_root
+        self.useranme = username
+        self.password = password
+
+    def is_list(self):
+        return self.command == 'list'
+
+    def is_update_local(self):
+        return self.command == 'update-local'
+
+    def is_update_remote(self):
+        return self.command == 'update-remote'
+
 
 def is_git_repo(name):
     owd = os.getcwd()
@@ -102,22 +118,15 @@ def scan_repository_root(repository_root):
 
 
 def usage():
-    return 'USAGE: upfork [list | update-local | update-remote] /path/to/git/repository/forks/'
-
-
-class Command:
-    def __init__(self, command, repository_root):
-        self.command = command
-        self.repository_root = repository_root
-
-    def is_list(self):
-        return self.command == 'list'
-
-    def is_update_local(self):
-        return self.command == 'update-local'
-
-    def is_update_remote(self):
-        return self.command == 'update-remote'
+    return ''.join((
+        'USAGE:\n',
+        'List the git repositories in a directory\n',
+        '`upfork list /path/to/git/repository/forks/`\n',
+        'Update the local copies of the git repositories in a directory\n',
+        '`upfork update-local /path/to/git/repository/forks/`\n',
+        'Update the remote copies of the git repositories in a directory\n',
+        '`upfork update-remote --username=USERANME --password=PASSWORD /path/to/git/repository/forks/`\n'
+    ))
 
 
 def parse_args(args):
@@ -125,6 +134,8 @@ def parse_args(args):
         return Command(args[1], args[2])
     elif args[1] == 'update-local':
         return Command(args[1], args[2])
+    elif args[1] == 'update-remote':
+        raise NotImplementedError
     else:
         raise ValueError(f'The argument `{args[1]}` is not a valid command name.')
 
@@ -162,11 +173,22 @@ def run_update_local(repository_set):
     os.chdir(owd)
 
 
+def run_update_remote(repository_set, credentials):
+    raise NotImplementedError
+
+
 def run_command(command, repository_set):
     if command.is_list():
         run_list(repository_set)
     elif command.is_update_local():
         run_update_local(repository_set)
+    elif command.is_update_remote():
+        run_update_remote(
+            repository_set, dict(
+                username=command.username, 
+                password=command.password
+            )
+        )
     else:
         raise ValueError(f'The command name `{command.command}` is not a valid command name.')
 
