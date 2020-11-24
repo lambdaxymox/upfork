@@ -93,7 +93,7 @@ def scan_repository_root(repository_root):
         repository = Repository(name, origin_url, urls)
         repositories[name] = repository
         
-        os.chdir('..')
+        os.chdir(os.path.pardir)
 
     os.chdir(owd)
 
