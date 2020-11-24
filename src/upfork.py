@@ -96,9 +96,8 @@ def scan_repository_root(repository_root):
         os.chdir('..')
 
     os.chdir(owd)
-    repository_set = RepositorySet(repository_root, repositories)
 
-    return repository_set
+    return RepositorySet(repository_root, repositories)
 
 
 def usage():
@@ -123,14 +122,14 @@ def main():
         sys.exit(usage())
 
     command = parse_args(sys.argv)
-    repo_root = command.repository_root
+    repository_root = command.repository_root
 
-    if not os.path.exists(repo_root):
-        sys.exit(f'Path does not exist: {repo_root}')
+    if not os.path.exists(repository_root):
+        sys.exit(f'Path does not exist: {repository_root}')
                          
-    repos = scan_repository_root(repo_root)
+    repos = scan_repository_root(repository_root)
     for repo in repos.repositories.values():
-        repo_path = os.path.join(repo_root, repo.name)
+        repo_path = os.path.join(repository_root, repo.name)
         print(f'REPO: {repo_path}')
         print(f'ORIGIN: {repo.origin_url}')
         print(f'MYORIGIN: {repo.remote_urls}')
