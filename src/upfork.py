@@ -151,8 +151,8 @@ def main():
     if not os.path.exists(command.repository_root):
         sys.exit(f'Path does not exist: {command.repository_root}')
                          
-    repos = scan_repository_root(command.repository_root)
-    run_command(command, repos)
+    repository_set = scan_repository_root(command.repository_root)
+    run_command(command, repository_set)
 
 
 if __name__ == 'main':
