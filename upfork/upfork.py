@@ -1,3 +1,4 @@
+import pexpect
 import os
 import os.path
 import subprocess
@@ -17,12 +18,17 @@ class Repository:
         self.remote_urls = remote_urls
 
 
+class Credentials:
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+
 class Command:
     def __init__(self, name, repository_root, username='', password=''):
         self.name = name
         self.repository_root = repository_root
-        self.useranme = username
-        self.password = password
+        self.credentials = Credentials(username, password)
 
     def is_list(self):
         return self.name == 'list'
@@ -152,24 +158,24 @@ def run_update_local(repository_set):
     os.chdir(old_working_dir)
 
 
-def run_update_remote(repository_set):
+def run_update_remote(repository_set, credentials):
     def git_push(label):
-        """
-        return subprocess.run(
-            ['git', 'push', '--all', label], 
-            capture_output=True, 
-            text=True
+        return pexpect.run(
+            f'git push {label} --all', 
+            withexitstatus=1, 
+            events={
+                '(?i)Username for': f'{credentials.username}\n', 
+                '(?i)Password for': f'{credentials.password}\n'
+            }
         )
-        """
-        return subprocess.run(['echo'], capture_output=True, text=True)
         
     old_working_dir = os.getcwd()
     os.chdir(repository_set.repository_root)
     for repository in repository_set.repositories.values():
         os.chdir(repository.name)
         for label, remote_url in repository.remote_urls.items():
-            result = git_push(label)
-            if result.returncode == 0:
+            command_output, exit_status = git_push(label)
+            if exit_status == 0:
                 print(
                     f'The remote copy of repository of `{repository.name}` with ' 
                     f'the name `{label}` and the URL `{remote_url}` has been '
@@ -180,8 +186,7 @@ def run_update_remote(repository_set):
                     f'An error occurred in updating the remote copy of the '
                     f'repository `{repository.name}` to the URL named `{label}` at URL `{remote_url}`.'
                 )
-                print(f'{result.stderr}')
-                print(f'{result.stdout}')
+                print(command_output)
 
         os.chdir(os.path.pardir)
 
@@ -194,7 +199,7 @@ def run_command(command, repository_set):
     elif command.is_update_local():
         run_update_local(repository_set)
     elif command.is_update_remote():
-        run_update_remote(repository_set)
+        run_update_remote(repository_set, command.credentials)
     else:
         raise ValueError(f'The command name `{command.name}` is not a valid command.')
 
