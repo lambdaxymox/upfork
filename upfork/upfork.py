@@ -34,6 +34,7 @@ class Command:
         return self.name == 'update-remote'
 
 
+
 def is_git_repo(name):
     old_working_dir = os.getcwd()
     ret = None
@@ -232,10 +233,4 @@ def main():
                          
     repository_set = scan_repository_root(command.repository_root)
     run_command(command, repository_set)
-
-
-if __name__ == '__main__':
-    main()
-else:
-    main()
 
