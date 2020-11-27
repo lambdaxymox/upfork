@@ -20,7 +20,12 @@ as **pep517** as follows
 python -m pep517.build .
 pip install .
 ```
-and the call the program directly.
+
+and the call the program directly via
+
+```
+upfork <action> <parameters> </path/to/git/repository/folder>
+```
 
 ## Usage
 **upfork** has three available commands. The **list** command searches a directory 
