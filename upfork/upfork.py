@@ -1,4 +1,5 @@
 import pexpect
+import argparse
 import os
 import os.path
 import subprocess
@@ -204,13 +205,68 @@ def run_command(command, repository_set):
         raise ValueError(f'The command name `{command.name}` is not a valid command.')
 
 
-def parse_args(args):
+def arg_parser():
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(
+        title='subcommands', 
+        description='valid subcommands', 
+        help='subcommand help'
+    )
+
+    # Subparser for the list command.
+    parser_list = subparsers.add_parser(
+        'list', 
+        help='Search a directory for git repositories'
+    )
+    parser_list.add_argument(
+        'path', type=str,
+        help='The path to the git repository directory'
+    )
+
+    # Subparser for the update-local command.
+    parser_update_local = subparsers.add_parser(
+        'update-local', 
+        help='Update the local copies of each git repository'
+    )
+    parser_update_local.add_argument(
+        'path', type=str,
+        help='The path to the git repository directory'
+    )
+
+    # Subparser for the update-remote command.
+    parser_update_remote = subparsers.add_parser(
+        'update-remote', 
+        help='Update the remote copies of each git repository'
+    )
+    parser_update_remote.add_argument(
+        '-u', '--username',
+        help='Username for remote git repositories'
+    )
+    parser_update_remote.add_argument(
+        '-p', '--password',
+        help='Password or personal access token for remote git repositories'
+    )
+    parser_update_remote.add_argument(
+        'path', type=str,
+        help='The path to the git repository directory'
+    )
+
+    return parser
+
+
+def parse_args(args): 
+    command_args = arg_parser().parse_args(args[1:])
     if args[1] == 'list':
-        return Command(args[1], args[2])
+        path = command_args.path
+        return Command(args[1], path)
     elif args[1] == 'update-local':
-        return Command(args[1], args[2])
+        path = command_args.path
+        return Command(args[1], path)
     elif args[1] == 'update-remote':
-        return Command(args[1], args[2])
+        username = command_args.username
+        password = command_args.password
+        path = command_args.path
+        return Command(args[1], path, username, password)
     else:
         raise ValueError(f'The argument `{args[1]}` is not a valid command name.')
 
@@ -231,7 +287,10 @@ def main():
     if len(sys.argv) < 3:
         sys.exit(usage())
 
-    command = parse_args(sys.argv)
+    try:
+        command = parse_args(sys.argv)
+    except:
+        sys.exit(usage())
 
     if not os.path.exists(command.repository_root):
         sys.exit(f'Path does not exist: {command.repository_root}')
